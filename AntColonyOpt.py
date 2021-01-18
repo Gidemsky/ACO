@@ -11,7 +11,7 @@ class AntColonyOptimizer:
     def __init__(self, ants_number, evaporation_rate, intensification, alpha=1.0, beta=0.0, beta_evaporation_rate=0,
                  choose_best=.1):
         """
-        Ant colony optimizer constructor
+        The Ant colony optimizer constructor
         :param ants_number: number of ants to traverse the graph
         :param evaporation_rate: rate that pheromone evaporates
         :param intensification: constant added to the best path
