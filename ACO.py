@@ -3,7 +3,7 @@ from Utils import *
 from itertools import permutations
 from sys import maxsize
 
-MATRIX_SIZE = 9
+MATRIX_SIZE = 100
 
 
 def run_naive_solution():
@@ -36,7 +36,7 @@ def run_naive_solution():
     print("End of the naive test. It took for -> " + str((time.time() - naive_start_time) / 60) + " minutes")
     print(b_path)
     print(b_val)
-    create_plot(shortest_paths=short_results, title="Hemilton circle search")
+    # create_plot(shortest_paths=short_results, title="Hemilton circle search")
 
 
 def run_the_better_solution(problem_matrix):
@@ -69,7 +69,7 @@ def run_the_better_solution(problem_matrix):
 
     print("End of the better naive test. It took for -> " + str((time.time() - naive_start_time) / 60) + " minutes")
     print(min_path)
-    create_plot(shortest_paths=short_results, title="Hamiltonian circuit search")
+    # create_plot(shortest_paths=short_results, title="Hamiltonian circuit search")
 
 
 if __name__ == '__main__':
@@ -79,9 +79,10 @@ if __name__ == '__main__':
     run_the_better_solution(problem)
 
     start_time = time.time()
-    aco_optimize = AntColonyOptimizer(ants_number=256, evaporation_rate=.05, intensification=2, alpha=1, beta=1,
+    aco_optimize = AntColonyOptimizer(ants_number=50, evaporation_rate=.05, intensification=2, alpha=1, beta=1,
                                       beta_evaporation_rate=0, choose_best=.1)
     best = aco_optimize.fit(problem, max_iterations=2048, stop_count=64)
     print("The ACO took for -> " + str(time.time() - start_time) + " seconds")
+    print("The best path value is: " + str(best))
 
     aco_optimize.show_plot()

@@ -39,7 +39,7 @@ class AntColonyOptimizer:
         self.heuristic_matrix = None
         self.probability_matrix = None
 
-        self.map = None
+        self.problem = None
         self.available_nodes = None
 
         # Internal stats
@@ -49,18 +49,15 @@ class AntColonyOptimizer:
         self.best_path = None
         self.fit_time = None
 
-        # Plotting values
-        self.stopped_early = False
-
     def algorithm_initialization(self):
         """
         Initializes the algorithm by creating pheromone, heuristic, probability matrices
         and creating a list of available nodes (cities)
         """
-        assert self.map.shape[0] == self.map.shape[1], "Map is not a distance matrix!"
+        assert self.problem.shape[0] == self.problem.shape[1], "Map is not a distance matrix!"
 
-        self.pheromone_matrix, self.available_nodes = create_and_modify_trace(size=self.map.shape[0])
-        self.heuristic_matrix = 1 / self.map
+        self.pheromone_matrix, self.available_nodes = create_and_modify_trace(size=self.problem.shape[0])
+        self.heuristic_matrix = 1 / self.problem
         self.probability_matrix = (self.pheromone_matrix ** self.alpha) * (
                 self.heuristic_matrix ** self.beta)
 
@@ -96,7 +93,7 @@ class AntColonyOptimizer:
             for i in range(len(path) - 1):
                 cur_coordinates_i.append(path[i])
                 cur_coordinates_j.append(path[i + 1])
-                score += self.map[path[i], path[i + 1]]
+                score += self.problem[path[i], path[i + 1]]
             scores[index] = score
             coordinates_i.append(cur_coordinates_i)
             coordinates_j.append(cur_coordinates_j)
@@ -104,36 +101,40 @@ class AntColonyOptimizer:
         best = np.argmin(scores)
         return (coordinates_i[best], coordinates_j[best]), paths[best], scores[best]
 
-    def evaporation(self):
+    def update_pheromone(self, best_coordinates):
         """
-        Evaporate the pheromone as the inverse of the evaporation rate.
-        In addition evaporates beta if desired.
+        The update pheromone works as well:
+        1 - evaporate the pheromone
+        2 - add pheromone to the best path
+        3 - calculate and update the probability matrix
+        :param best_coordinates: x and y (i and j) coordinates of the best route
+        :return:
         """
+        # calculate the pheromone as the inverse of the evaporation rate.
         self.pheromone_matrix *= (1 - self.evaporation_rate)
         self.beta *= (1 - self.beta_evaporation_rate)
 
-    def intensify(self, best_coordinates):
-        """
-        Increases the pheromone by a scalar for the best route.
-        :param best_coordinates: x and y (i and j) coordinates of the best route
-        """
+        # increases the pheromone by a scalar for the best route.
         i = best_coordinates[0]
         j = best_coordinates[1]
         self.pheromone_matrix[i, j] += self.pheromone_intensification
 
-    def fit(self, map_matrix, max_iterations=100, stop_count=35, debug=True):
+        # the probability updated as followed
+        self.probability_matrix = (self.pheromone_matrix ** self.alpha) * (self.heuristic_matrix ** self.beta)
+
+    def fit(self, problem_matrix, max_iterations=100, stop_count=32, debug=True):
         """
-        Fits the ACO to a specific map.  This was designed with the Traveling Salesman problem in mind.
-        :param debug:
-        :param map_matrix: Distance matrix or some other matrix with similar properties
+        Fits the ACO to the given matrix.
+        :param debug: In case we want to see prints of the progress
+        :param problem_matrix: Distance matrix or some other matrix with similar properties
         :param max_iterations: number of iterations
         :param stop_count: how many iterations of the same score to make the algorithm stop early
         :return: the best score
         """
         global best_score_so_far
         if debug:
-            print("Beginning ACO Optimization with {} iterations...".format(max_iterations))
-        self.map = map_matrix
+            print("Start the ACO Optimization with {} iterations...".format(max_iterations))
+        self.problem = problem_matrix
         start = time.time()
         self.algorithm_initialization()
         num_equal = 0
@@ -156,7 +157,7 @@ class AntColonyOptimizer:
                 # go back to start
                 cur_path.append(start_node)
                 # resets the available nodes to all nodes for the next iteration
-                self.available_nodes = list(range(self.map.shape[0]))
+                self.available_nodes = list(range(self.problem.shape[0]))
                 all_path.append(cur_path)  # TODO: change to copy and clear
                 cur_path = []
 
@@ -174,11 +175,13 @@ class AntColonyOptimizer:
                 num_equal = 0
 
             self.best_series.append(best_score)
-            self.evaporation()
-            self.intensify(best_coordinates=best_path_coordinates)
 
-            # after the evaporation and intensification processes, the probability updated as followed
-            self.probability_matrix = (self.pheromone_matrix ** self.alpha) * (self.heuristic_matrix ** self.beta)
+            self.update_pheromone(best_coordinates=best_path_coordinates)
+            # self.evaporation()
+            # self.intensify(best_coordinates=best_path_coordinates)
+
+            # # after the evaporation and intensification processes, the probability updated as followed
+            # self.probability_matrix = (self.pheromone_matrix ** self.alpha) * (self.heuristic_matrix ** self.beta)
 
             if debug:
                 print("Best score at this iteration {}: {}; Best all iterations score: {} ({}s)"
@@ -186,7 +189,6 @@ class AntColonyOptimizer:
                                 round(time.time() - start_iter)))
 
             if best_score == best_score_so_far and num_equal == stop_count:
-                self.stopped_early = True
                 print("Stopping early due to {} iterations of the same score.".format(stop_count))
                 break
 
