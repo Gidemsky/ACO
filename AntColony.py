@@ -8,8 +8,7 @@ warnings.filterwarnings("ignore")
 
 
 class AntColony:
-    def __init__(self, ants_number, evaporation_rate, intensification, alpha=1.0, beta=0.0, beta_evaporation_rate=0,
-                 choose_best=.1):
+    def __init__(self, ants_number, evaporation_rate, intensification, alpha=1.0, beta=0.0, choose_best=.1):
         """
         The Ant colony optimizer constructor
         :param ants_number: number of ants to traverse the graph
@@ -17,7 +16,6 @@ class AntColony:
         :param intensification: constant added to the best path
         :param alpha: weighting of pheromone. Must be more or equal to 0
         :param beta: weighting of heuristic (1/distance). Must be more or equal to 1
-        :param beta_evaporation_rate: rate at which beta decays (optional)
         :param choose_best: the probability to choose the best route
         """
         # Algorithm parameters
@@ -32,7 +30,6 @@ class AntColony:
         assert alpha >= 1, "The beta parameter isn't legal"
         self.beta = beta
 
-        self.beta_evaporation_rate = beta_evaporation_rate
         self.choose_best = choose_best
 
         # algorithm matrices
@@ -113,7 +110,6 @@ class AntColony:
         """
         # calculate the pheromone as the inverse of the evaporation rate.
         self.pheromone_matrix *= (1 - self.evaporation_rate)
-        self.beta *= (1 - self.beta_evaporation_rate)
 
         # increases the pheromone by a scalar for the best route.
         i = best_coordinates[0]
@@ -201,13 +197,13 @@ class AntColony:
 
         return self.best
 
-    def show_plot(self):
+    def show_plot(self, file_name=None):
         """
         Shows the shortest results using plots over time after the algorithm has been fitted.
         :return: None in case the ACO algorithm has not been fitted
         """
         if self.fitted:
-            create_plot(shortest_paths=self.best_series, title="Ant Colony Optimization results")
+            create_plot(shortest_paths=self.best_series, title="Ant Colony Optimization results", file_name=file_name)
         else:
-            print("The Ant Colony algorithm not fitted!\n")
+            print("The Ant Colony algorithm has not been fitted!\n")
             return None

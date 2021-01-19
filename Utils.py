@@ -51,14 +51,24 @@ def create_matrix_arr(size):
     return index_arr
 
 
-def create_plot(shortest_paths, title):
+def create_plot(shortest_paths, title, file_name=None, ants=None, er=None, a=None, b=None, time=None, ):
     fig, ax = plt.subplots(figsize=(20, 15))
     ax.plot(shortest_paths, label="Best Run")
     ax.set_xlabel("Iteration number")
     ax.set_ylabel("The Shortest Path")
+    ax.text(.8, .6,
+            'summary:\n'
+            'Ants in colony: {}\nEvaporation Rate: {}\nAlpha: {}\nBeta: {}\n\nRunning Time: {} minute'.format(
+                ants, er, a, b, time // 60),
+            bbox={'facecolor': 'gray', 'alpha': 0.8, 'pad': 10}, transform=ax.transAxes)
     ax.legend()
-    plt.title(title)
-    plt.show()
+    plt.title(title + " ")
+    if not file_name:
+        plt.title(title)
+        plt.show()
+    else:
+        plt.title(title + " - " + file_name + ".png")
+        plt.savefig(file_name)
 
 
 def create_and_modify_trace(size, diagonal_src_value=1, diagonal_dst_value=0):

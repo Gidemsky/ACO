@@ -36,7 +36,7 @@ def run_naive_solution():
     print("End of the naive test. It took for -> " + str((time.time() - naive_start_time)) + " seconds")
     print(b_path)
     print(b_val)
-    # create_plot(shortest_paths=short_results, title="Hemilton circle search")
+    create_plot(shortest_paths=short_results, title="Hamiltonian circle search")
 
 
 def run_the_better_solution(problem_matrix):
@@ -85,7 +85,7 @@ if __name__ == '__main__':
         start_time = time.time()
         print("evaporation_rate: " + str(0.8))
         aco_optimize = AntColony(ants_number=((i+1)*50), evaporation_rate=.2, intensification=2, alpha=1, beta=1,
-                                 beta_evaporation_rate=0, choose_best=.1)
+                                 choose_best=.1)
         best = aco_optimize.fit(problem, max_iterations=1500, stop_count=30, debug=True)
         print("The ACO took for -> " + str(time.time() - start_time) + " seconds")
         print("The best path value is: " + str(best))
@@ -94,7 +94,7 @@ if __name__ == '__main__':
         start_time = time.time()
         print("evaporation_rate: " + str(0.95))
         aco_optimize = AntColony(ants_number=((i+1)*50), evaporation_rate=.05, intensification=2, alpha=1, beta=1,
-                                 beta_evaporation_rate=0, choose_best=.1)
+                                 choose_best=.1)
         best = aco_optimize.fit(problem, max_iterations=1500, stop_count=30, debug=True)
         print("The ACO took for -> " + str(time.time() - start_time) + " seconds")
         print("The best path value is: " + str(best))
@@ -103,7 +103,7 @@ if __name__ == '__main__':
         start_time = time.time()
         print("evaporation_rate: " + str(0.99))
         aco_optimize = AntColony(ants_number=((i+1)*50), evaporation_rate=.01, intensification=2, alpha=1, beta=1,
-                                 beta_evaporation_rate=0, choose_best=.1)
+                                 choose_best=.1)
         best = aco_optimize.fit(problem, max_iterations=1500, stop_count=30, debug=True)
         print("The ACO took for -> " + str(time.time() - start_time) + " seconds")
         print("The best path value is: " + str(best))
@@ -111,7 +111,7 @@ if __name__ == '__main__':
 
         start_time = time.time()
         aco_optimize = AntColony(ants_number=((i+1)*50), evaporation_rate=.2, intensification=2, alpha=1, beta=1,
-                                 beta_evaporation_rate=0, choose_best=.1)
+                                 choose_best=.1)
         best = aco_optimize.fit(problem, max_iterations=1500, stop_count=30, debug=True)
         print("The ACO took for -> " + str(time.time() - start_time) + " seconds")
         print("The best path value is: " + str(best))
