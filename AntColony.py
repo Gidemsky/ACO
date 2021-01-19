@@ -7,7 +7,7 @@ from Utils import create_plot, create_and_modify_trace
 warnings.filterwarnings("ignore")
 
 
-class AntColonyOptimizer:
+class AntColony:
     def __init__(self, ants_number, evaporation_rate, intensification, alpha=1.0, beta=0.0, beta_evaporation_rate=0,
                  choose_best=.1):
         """
@@ -21,6 +21,7 @@ class AntColonyOptimizer:
         :param choose_best: the probability to choose the best route
         """
         # Algorithm parameters
+        assert ants_number != 0, "There is no ant in the colony"
         self.ants = ants_number
         self.evaporation_rate = evaporation_rate
         self.pheromone_intensification = intensification
@@ -122,7 +123,7 @@ class AntColonyOptimizer:
         # the probability updated as followed
         self.probability_matrix = (self.pheromone_matrix ** self.alpha) * (self.heuristic_matrix ** self.beta)
 
-    def fit(self, problem_matrix, max_iterations=100, stop_count=32, debug=True):
+    def fit(self, problem_matrix, max_iterations=100, stop_count=32, debug=False):
         """
         Fits the ACO to the given matrix.
         :param debug: In case we want to see prints of the progress
@@ -197,7 +198,8 @@ class AntColonyOptimizer:
         self.best = self.best_series[np.argmin(self.best_series)]
         if debug:
             print("ACO fitted.  Runtime: {} minutes.  Best score: {}".format(self.fit_time / 60, self.best))
-            return self.best
+
+        return self.best
 
     def show_plot(self):
         """
