@@ -155,7 +155,7 @@ class AntColony:
                 cur_path.append(start_node)
                 # resets the available nodes to all nodes for the next iteration
                 self.available_nodes = list(range(self.problem.shape[0]))
-                all_path.append(cur_path)  # TODO: change to copy and clear
+                all_path.append(cur_path)
                 cur_path = []
 
             best_path_coordinates, best_path, best_score = self.evaluate(all_path)
@@ -172,13 +172,7 @@ class AntColony:
                 num_equal = 0
 
             self.best_series.append(best_score)
-
             self.update_pheromone(best_coordinates=best_path_coordinates)
-            # self.evaporation()
-            # self.intensify(best_coordinates=best_path_coordinates)
-
-            # # after the evaporation and intensification processes, the probability updated as followed
-            # self.probability_matrix = (self.pheromone_matrix ** self.alpha) * (self.heuristic_matrix ** self.beta)
 
             if debug:
                 print("Best score at this iteration {}: {}; Best all iterations score: {} ({}s)"
@@ -203,7 +197,9 @@ class AntColony:
         :return: None in case the ACO algorithm has not been fitted
         """
         if self.fitted:
-            create_plot(shortest_paths=self.best_series, title="Ant Colony Optimization results", file_name=file_name)
+            create_plot(shortest_paths=self.best_series, title="Ant Colony Optimization results", file_name=file_name,
+                        ants=self.ants, er=self.evaporation_rate, a=self.alpha, b=self.beta, run_time=self.fit_time,
+                        best_path=self.best)
         else:
             print("The Ant Colony algorithm has not been fitted!\n")
             return None
