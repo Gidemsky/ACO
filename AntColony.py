@@ -129,12 +129,15 @@ class AntColony:
         :return: the best score
         """
         global best_score_so_far
+        perv_best_score = None
+
         if debug:
             print("Start the ACO Optimization with {} iterations...".format(max_iterations))
-        self.problem = problem_matrix
+
         start = time.time()
+        self.problem = problem_matrix
         self.algorithm_initialization()
-        num_equal = 0
+        num_equal, num_all_best_equal = 0, 0
 
         for i in range(max_iterations):
             start_iter = time.time()
@@ -160,6 +163,13 @@ class AntColony:
 
             best_path_coordinates, best_path, best_score = self.evaluate(all_path)
 
+            # if perv_best_score is None:
+            if perv_best_score == best_score and i != 0:
+                num_equal += 1
+            else:
+                num_equal = 0
+
+            perv_best_score = best_score
             if i == 0:
                 best_score_so_far = best_score
             elif best_score < best_score_so_far:
@@ -167,9 +177,9 @@ class AntColony:
                 self.best_path = best_path
 
             if best_score == best_score_so_far:
-                num_equal += 1
+                num_all_best_equal += 1
             else:
-                num_equal = 0
+                num_all_best_equal = 0
 
             self.best_series.append(best_score)
             self.update_pheromone(best_coordinates=best_path_coordinates)
@@ -179,13 +189,18 @@ class AntColony:
                       "".format(i, round(best_score, 2), round(best_score_so_far, 2),
                                 round(time.time() - start_iter)))
 
-            if best_score == best_score_so_far and num_equal == stop_count:
-                print("Stopping early due to {} iterations of the same score.".format(stop_count))
+            if best_score == best_score_so_far and num_all_best_equal == stop_count:
+                print("Stop early due to {} iterations of the same best score.".format(stop_count))
                 break
 
-        self.fit_time = round(time.time() - start)
+            if num_equal == (stop_count * 3):
+                print("Stop early due to {} iterations of the same score.".format(stop_count * 3))
+                break
+
         self.fitted = True
+        self.fit_time = round(time.time() - start)
         self.best = self.best_series[np.argmin(self.best_series)]
+
         if debug:
             print("ACO fitted.  Runtime: {} minutes.  Best score: {}".format(self.fit_time / 60, self.best))
 

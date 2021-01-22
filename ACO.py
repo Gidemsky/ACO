@@ -1,11 +1,13 @@
 import csv
 
+from numpy import genfromtxt
+
 from AntColony import AntColony
 from Utils import *
 from itertools import permutations
 from sys import maxsize
 
-MATRIX_SIZE = 250
+MATRIX_SIZE = 150
 
 
 def run_naive_solution():
@@ -74,14 +76,16 @@ def run_the_better_solution(problem_matrix):
     # create_plot(shortest_paths=short_results, title="Hamiltonian circuit search")
 
 
-def run_aco(ants=50, ev_r=0.05, save_to_file=None):
+def run_aco(ants=50, ev_r=0.05, save_to_file=None, flag=0, a=1, b=1):
     print("starting the running of the algorithm:\n"
           "ants number: " + str(ants) + "\nevaporation_rate: " + str(ev_r) + "\n")
-    aco_optimize = AntColony(ants_number=ants, evaporation_rate=ev_r, intensification=2, alpha=1, beta=1,
+    aco_optimize = AntColony(ants_number=ants, evaporation_rate=ev_r, intensification=2, alpha=a, beta=b,
                              choose_best=.1)
-    best = aco_optimize.fit(problem, max_iterations=2500, stop_count=25, debug=True)
+    best = aco_optimize.fit(problem, max_iterations=2000, stop_count=30, debug=True)
     print("The best path value is: " + str(best))
     aco_optimize.show_plot(file_name=save_to_file)
+    # if flag == 1 or flag == 2:
+    #     aco_optimize.show_plot(file_name=save_to_file)
     return best
 
 
@@ -94,7 +98,8 @@ def run_test(mat_problem, runs, ev_r, csv_file, ants=25):
             print("\n<- start iteration number " + str(run + 1) + " ->\n")
             start_time = time.time()
             best += run_aco(ants=ants, ev_r=ev_r, save_to_file=csv_file + "_Ant-" + str(ants) + "_Evp-" +
-                                                               str(int(ev_r * 100)) + "_" + str(run + 1))
+                                                               str(ev_r).replace('.', '') + "_" + str(run + 1),
+                            flag=run)
             total_run_time += time.time() - start_time
         best = best / runs
         total_run_time = (total_run_time / runs) / 60
@@ -107,7 +112,8 @@ if __name__ == '__main__':
 
     print("creating the problem to solve\n")
     problem = create_matrix_problem(size=MATRIX_SIZE, min=1, max=100, is_trace_zero=True, is_mirror=True)
-    np.savetxt("Problem Matrix.csv", problem, fmt='%i', delimiter=",")
+    # problem = genfromtxt('Problem Matrix.csv', delimiter=',')
+    # np.savetxt("Problem Matrix.csv", problem, fmt='%i', delimiter=",")
     print("the matrix has been created successfully")
     if MATRIX_SIZE <= 50:
         print("the matrix is:\n")
@@ -117,12 +123,23 @@ if __name__ == '__main__':
     # run_the_better_solution(problem.copy())
     # run_naive_solution()
 
-    best_results = [run_test(mat_problem=problem, runs=3, ev_r=.2, csv_file="Test1-"),
-                    run_test(mat_problem=problem, runs=3, ev_r=.05, csv_file="Test2-"),
-                    run_test(mat_problem=problem, runs=3, ev_r=.01, csv_file="Test3-")]
-
+    best_results = [run_test(mat_problem=problem, runs=4, ev_r=.2, csv_file="Test1-")]
     with open("ACO results.csv", 'w', newline='') as file:
         writer = csv.writer(file)
         writer.writerow(["ants", "evaporation", "avg time", "best_score"])
         writer.writerows(best_results)
-
+    best_results.append(run_test(mat_problem=problem, runs=4, ev_r=.05, csv_file="Test2-"))
+    with open("ACO results.csv", 'w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(["ants", "evaporation", "avg time", "best_score"])
+        writer.writerows(best_results)
+    best_results.append(run_test(mat_problem=problem, runs=4, ev_r=.01, csv_file="Test3-"))
+    with open("ACO results.csv", 'w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(["ants", "evaporation", "avg time", "best_score"])
+        writer.writerows(best_results)
+    best_results.append(run_test(mat_problem=problem, runs=4, ev_r=0, csv_file="Test4-"))
+    with open("ACO results.csv", 'w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(["ants", "evaporation", "avg time", "best_score"])
+        writer.writerows(best_results)
