@@ -8,8 +8,7 @@ warnings.filterwarnings("ignore")
 
 
 class AntColony:
-    def __init__(self, ants_number, evaporation_rate, intensification, alpha=1.0, beta=0.0, beta_evaporation_rate=0,
-                 choose_best=.1):
+    def __init__(self, ants_number, evaporation_rate, intensification, alpha=1.0, beta=0.0, choose_best=.1):
         """
         The Ant colony optimizer constructor
         :param ants_number: number of ants to traverse the graph
@@ -17,7 +16,6 @@ class AntColony:
         :param intensification: constant added to the best path
         :param alpha: weighting of pheromone. Must be more or equal to 0
         :param beta: weighting of heuristic (1/distance). Must be more or equal to 1
-        :param beta_evaporation_rate: rate at which beta decays (optional)
         :param choose_best: the probability to choose the best route
         """
         # Algorithm parameters
@@ -32,7 +30,6 @@ class AntColony:
         assert alpha >= 1, "The beta parameter isn't legal"
         self.beta = beta
 
-        self.beta_evaporation_rate = beta_evaporation_rate
         self.choose_best = choose_best
 
         # algorithm matrices
@@ -113,7 +110,6 @@ class AntColony:
         """
         # calculate the pheromone as the inverse of the evaporation rate.
         self.pheromone_matrix *= (1 - self.evaporation_rate)
-        self.beta *= (1 - self.beta_evaporation_rate)
 
         # increases the pheromone by a scalar for the best route.
         i = best_coordinates[0]
@@ -123,7 +119,7 @@ class AntColony:
         # the probability updated as followed
         self.probability_matrix = (self.pheromone_matrix ** self.alpha) * (self.heuristic_matrix ** self.beta)
 
-    def fit(self, problem_matrix, max_iterations=100, stop_count=32, debug=False):
+    def fitness(self, problem_matrix, max_iterations=100, stop_count=32, debug=False):
         """
         Fits the ACO to the given matrix.
         :param debug: In case we want to see prints of the progress
@@ -133,12 +129,15 @@ class AntColony:
         :return: the best score
         """
         global best_score_so_far
+        perv_best_score = None
+
         if debug:
             print("Start the ACO Optimization with {} iterations...".format(max_iterations))
-        self.problem = problem_matrix
+
         start = time.time()
+        self.problem = problem_matrix
         self.algorithm_initialization()
-        num_equal = 0
+        num_equal, num_all_best_equal = 0, 0
 
         for i in range(max_iterations):
             start_iter = time.time()
@@ -159,11 +158,18 @@ class AntColony:
                 cur_path.append(start_node)
                 # resets the available nodes to all nodes for the next iteration
                 self.available_nodes = list(range(self.problem.shape[0]))
-                all_path.append(cur_path)  # TODO: change to copy and clear
+                all_path.append(cur_path)
                 cur_path = []
 
             best_path_coordinates, best_path, best_score = self.evaluate(all_path)
 
+            # if perv_best_score is None:
+            if perv_best_score == best_score and i != 0:
+                num_equal += 1
+            else:
+                num_equal = 0
+
+            perv_best_score = best_score
             if i == 0:
                 best_score_so_far = best_score
             elif best_score < best_score_so_far:
@@ -171,43 +177,45 @@ class AntColony:
                 self.best_path = best_path
 
             if best_score == best_score_so_far:
-                num_equal += 1
+                num_all_best_equal += 1
             else:
-                num_equal = 0
+                num_all_best_equal = 0
 
             self.best_series.append(best_score)
-
             self.update_pheromone(best_coordinates=best_path_coordinates)
-            # self.evaporation()
-            # self.intensify(best_coordinates=best_path_coordinates)
-
-            # # after the evaporation and intensification processes, the probability updated as followed
-            # self.probability_matrix = (self.pheromone_matrix ** self.alpha) * (self.heuristic_matrix ** self.beta)
 
             if debug:
                 print("Best score at this iteration {}: {}; Best all iterations score: {} ({}s)"
                       "".format(i, round(best_score, 2), round(best_score_so_far, 2),
                                 round(time.time() - start_iter)))
 
-            if best_score == best_score_so_far and num_equal == stop_count:
-                print("Stopping early due to {} iterations of the same score.".format(stop_count))
+            if best_score == best_score_so_far and num_all_best_equal == stop_count:
+                print("Stop early due to {} iterations of the same best score.".format(stop_count))
                 break
 
-        self.fit_time = round(time.time() - start)
+            if num_equal == (stop_count * 3):
+                print("Stop early due to {} iterations of the same score.".format(stop_count * 3))
+                break
+
         self.fitted = True
+        self.fit_time = round(time.time() - start)
         self.best = self.best_series[np.argmin(self.best_series)]
+
         if debug:
             print("ACO fitted.  Runtime: {} minutes.  Best score: {}".format(self.fit_time / 60, self.best))
 
         return self.best
 
-    def show_plot(self):
+    def show_plot(self, file_name=None):
         """
         Shows the shortest results using plots over time after the algorithm has been fitted.
+        :param file_name: the file name in case I what to print the plot
         :return: None in case the ACO algorithm has not been fitted
         """
         if self.fitted:
-            create_plot(shortest_paths=self.best_series, title="Ant Colony Optimization results")
+            create_plot(shortest_paths=self.best_series, title="Ant Colony Optimization results", file_name=file_name,
+                        ants=self.ants, er=self.evaporation_rate, a=self.alpha, b=self.beta, run_time=self.fit_time,
+                        best_path=self.best)
         else:
-            print("The Ant Colony algorithm not fitted!\n")
+            print("The Ant Colony algorithm has not been fitted!\n")
             return None
