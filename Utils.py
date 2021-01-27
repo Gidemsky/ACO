@@ -4,6 +4,14 @@ import matplotlib.pyplot as plt
 
 
 def permute(a, l, r, all_path):
+    """
+    the permutation
+    :param a: the list
+    :param l:
+    :param r: the length - 1 of the list
+    :param all_path: an empty list for all the permutations
+    :return:
+    """
     if l == r:
         all_path.append(a.copy())
     else:
@@ -14,6 +22,12 @@ def permute(a, l, r, all_path):
 
 
 def run_permutation(path_list, param):
+    """
+    permutation calculation of the array
+    :param path_list:
+    :param param:
+    :return:
+    """
     all_path = []
     print("start of the permute")
     start_time = time.time()
@@ -23,6 +37,15 @@ def run_permutation(path_list, param):
 
 
 def create_matrix_problem(size, min, max, is_trace_zero, is_mirror):
+    """
+    create the matrix to the tsp problem format
+    :param size:
+    :param min:
+    :param max:
+    :param is_trace_zero:
+    :param is_mirror:
+    :return:
+    """
     matrix = np.random.randint(min, max, size=(size, size))
     if is_mirror:
         for i in range(size):
@@ -38,6 +61,11 @@ def create_matrix_problem(size, min, max, is_trace_zero, is_mirror):
 
 
 def create_matrix_string(size):
+    """
+    the matrix convert to string
+    :param size:
+    :return:
+    """
     string = ""
     for i in range(size):
         string += str(i)
@@ -45,6 +73,11 @@ def create_matrix_string(size):
 
 
 def create_matrix_arr(size):
+    """
+    the problem matrix to array
+    :param size:
+    :return:
+    """
     index_arr = []
     for i in range(size):
         index_arr.append(i)
@@ -53,6 +86,20 @@ def create_matrix_arr(size):
 
 def create_plot(shortest_paths, title, file_name=None, ants=None, er=None, a=None, b=None, run_time=None,
                 best_path=None):
+    """
+    the plot creation function.
+    all the values are the value to be printed if there are exist
+    :param shortest_paths:
+    :param title:
+    :param file_name:
+    :param ants:
+    :param er:
+    :param a:
+    :param b:
+    :param run_time:
+    :param best_path:
+    :return:
+    """
     fig, ax = plt.subplots(figsize=(20, 15))
     ax.plot(shortest_paths, label="Best Run")
     ax.set_xlabel("Iteration number")
@@ -74,10 +121,22 @@ def create_plot(shortest_paths, title, file_name=None, ants=None, er=None, a=Non
 
 
 def create_and_modify_trace(size, diagonal_src_value=1, diagonal_dst_value=0):
+    """
+    set the trace to to 0
+    :param size:
+    :param diagonal_src_value:
+    :param diagonal_dst_value:
+    :return:
+    """
     temp_matrix = np.ones((size, size))
     temp_matrix[np.eye(size) == diagonal_src_value] = diagonal_dst_value
     return temp_matrix, list(range(size))
 
 
 def print_long_line(title):
+    """
+    line separator
+    :param title: the title to be print in the center of the line separator
+    :return:
+    """
     print("\n<-------------- " + title + " -------------->\n")

@@ -119,7 +119,7 @@ class AntColony:
         # the probability updated as followed
         self.probability_matrix = (self.pheromone_matrix ** self.alpha) * (self.heuristic_matrix ** self.beta)
 
-    def fit(self, problem_matrix, max_iterations=100, stop_count=32, debug=False):
+    def fitness(self, problem_matrix, max_iterations=100, stop_count=32, debug=False):
         """
         Fits the ACO to the given matrix.
         :param debug: In case we want to see prints of the progress
@@ -209,6 +209,7 @@ class AntColony:
     def show_plot(self, file_name=None):
         """
         Shows the shortest results using plots over time after the algorithm has been fitted.
+        :param file_name: the file name in case I what to print the plot
         :return: None in case the ACO algorithm has not been fitted
         """
         if self.fitted:

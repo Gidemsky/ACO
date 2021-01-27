@@ -68,24 +68,22 @@ def run_the_better_solution(problem_matrix):
             current_pathweight += problem_matrix[k][s]
 
             # update minimum
-            # short_results.append(current_pathweight)
+            short_results.append(current_pathweight)
             min_path = min(min_path, current_pathweight)
 
     print("End of the better naive test. It took for -> " + str((time.time() - naive_start_time)) + " seconds")
     print(min_path)
-    # create_plot(shortest_paths=short_results, title="Hamiltonian circuit search")
+    create_plot(shortest_paths=short_results, title="Hamiltonian circuit search")
 
 
-def run_aco(ants=50, ev_r=0.05, save_to_file=None, flag=0, a=1, b=1):
+def run_aco(ants=400, ev_r=0.05, save_to_file=None, a=4, b=3):
     print("starting the running of the algorithm:\n"
           "ants number: " + str(ants) + "\nevaporation_rate: " + str(ev_r) + "\n")
     aco_optimize = AntColony(ants_number=ants, evaporation_rate=ev_r, intensification=2, alpha=a, beta=b,
                              choose_best=.1)
-    best = aco_optimize.fit(problem, max_iterations=2000, stop_count=30, debug=True)
+    best = aco_optimize.fitness(problem, max_iterations=4000, stop_count=30, debug=True)
     print("The best path value is: " + str(best))
     aco_optimize.show_plot(file_name=save_to_file)
-    # if flag == 1 or flag == 2:
-    #     aco_optimize.show_plot(file_name=save_to_file)
     return best
 
 
@@ -98,8 +96,7 @@ def run_test(mat_problem, runs, ev_r, csv_file, ants=25):
             print("\n<- start iteration number " + str(run + 1) + " ->\n")
             start_time = time.time()
             best += run_aco(ants=ants, ev_r=ev_r, save_to_file=csv_file + "_Ant-" + str(ants) + "_Evp-" +
-                                                               str(ev_r).replace('.', '') + "_" + str(run + 1),
-                            flag=run)
+                                                               str(ev_r).replace('.', '') + "_" + str(run + 1))
             total_run_time += time.time() - start_time
         best = best / runs
         total_run_time = (total_run_time / runs) / 60
@@ -111,9 +108,9 @@ def run_test(mat_problem, runs, ev_r, csv_file, ants=25):
 if __name__ == '__main__':
 
     print("creating the problem to solve\n")
-    problem = create_matrix_problem(size=MATRIX_SIZE, min=1, max=100, is_trace_zero=True, is_mirror=True)
-    # problem = genfromtxt('Problem Matrix.csv', delimiter=',')
+    # problem = create_matrix_problem(size=MATRIX_SIZE, min=1, max=100, is_trace_zero=True, is_mirror=True)
     # np.savetxt("Problem Matrix.csv", problem, fmt='%i', delimiter=",")
+    problem = genfromtxt('Problem Matrix.csv', delimiter=',')
     print("the matrix has been created successfully")
     if MATRIX_SIZE <= 50:
         print("the matrix is:\n")
@@ -133,13 +130,14 @@ if __name__ == '__main__':
         writer = csv.writer(file)
         writer.writerow(["ants", "evaporation", "avg time", "best_score"])
         writer.writerows(best_results)
+    # best_results = [run_test(mat_problem=problem, runs=4, ev_r=.01, csv_file="Test3-")]
     best_results.append(run_test(mat_problem=problem, runs=4, ev_r=.01, csv_file="Test3-"))
-    with open("ACO results.csv", 'w', newline='') as file:
+    with open("ACO results2.csv", 'w', newline='') as file:
         writer = csv.writer(file)
         writer.writerow(["ants", "evaporation", "avg time", "best_score"])
         writer.writerows(best_results)
     best_results.append(run_test(mat_problem=problem, runs=4, ev_r=0, csv_file="Test4-"))
-    with open("ACO results.csv", 'w', newline='') as file:
+    with open("ACO results2.csv", 'w', newline='') as file:
         writer = csv.writer(file)
         writer.writerow(["ants", "evaporation", "avg time", "best_score"])
         writer.writerows(best_results)
